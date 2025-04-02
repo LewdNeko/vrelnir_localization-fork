@@ -18,7 +18,7 @@ GITHUB_ACTION_ISBETA = len(SYSTEM_ARGV) > 2 and SYSTEM_ARGV[2] == "beta"
 PARATRANZ_TOKEN = os.getenv("PARATRANZ_TOKEN") or ""  # 必填，在个人设置里
 PARATRANZ_BASE_URL = "https://paratranz.cn/api"
 PARATRANZ_HEADERS = {"Authorization": PARATRANZ_TOKEN}
-PARATRANZ_PROJECT_DOL_ID = 4780  # DOL 项目 ID
+PARATRANZ_PROJECT_DOL_ID = os.getenv("PARATRANZ_PROJECT_DOL_ID")  # DOL 项目 ID
 CHINESE_VERSION = os.getenv("CHINESE_VERSION") or ""  # 必填，参考 README
 SOURCE_TYPE = os.getenv("SOURCE_TYPE") or "common"  # 必填，common 或 dev
 
