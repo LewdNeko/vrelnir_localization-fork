@@ -29,7 +29,7 @@ LOGGER_COLOR = logger.opt(colors=True)
 
 
 class ProjectDOL:
-    """本地化主类"""
+    """Localization main class"""
     def __init__(self, type_: str = "common"):
         with open(DIR_JSON_ROOT / "blacklists.json", "r", encoding="utf-8") as fp:
             self._blacklists: dict[str, list] = json.load(fp)
@@ -52,11 +52,11 @@ class ProjectDOL:
         self._game_texts_file_lists: list[Path] = None
 
     def _init_dirs(self, version: str):
-        """创建目标文件夹"""
+        """Create folders"""
         os.makedirs(DIR_TEMP_ROOT, exist_ok=True)
         os.makedirs(DIR_RAW_DICTS / self._type / version / "csv", exist_ok=True)
 
-    """ 获取最新版本 """
+    """ Get DoL latest version """
     async def fetch_latest_version(self, is_quiet: bool = True):
         async with httpx.AsyncClient(verify=False) as client:
             if self._type == "common":
@@ -65,13 +65,13 @@ class ProjectDOL:
                 url = f"{REPOSITORY_URL_DEV}/-/raw/dev/version"
             response = await client.get(url)
             if not is_quiet:
-                logger.info(f"当前{self._mention_name}仓库最新版本: {response.text}")
+                logger.info(f"current {self._mention_name} latest: {response.text}")
             self._version = response.text
         self._init_dirs(self._version)
 
     """ 下载源码 """
     async def download_from_gitgud(self):
-        """从 gitgud 下载源仓库文件"""
+        """Download sources from gitgud"""
         if not self._version:
             await self.fetch_latest_version()
         if self._is_latest:  # 下载慢，是最新就不要重复下载了
@@ -85,8 +85,8 @@ class ProjectDOL:
         await self.unzip_latest_repository()
 
     async def fetch_latest_repository(self):
-        """获取最新仓库内容"""
-        logger.info(f"===== 开始获取最新{self._mention_name}仓库内容 ...")
+        """Fetch latest repository content"""
+        logger.info(f"===== Start getting the latest {self._mention_name} DoL contents ...")
         async with httpx.AsyncClient(verify=False) as client:
             if self._type == "common":
                 zip_url = REPOSITORY_ZIP_URL_COMMON
@@ -105,29 +105,29 @@ class ProjectDOL:
                     break
 
             if not flag:
-                logger.error("***** 无法正常下载最新仓库源码！请检查你的网络连接是否正常！")
+                logger.error("***** Unable to download the latest source code! Please check your network!")
             tasks = [
                 chunk_download(zip_url, client, start, end, idx, len(chunks), DIR_TEMP_ROOT / f"dol{self._mention_name}.zip")
                 for idx, (start, end) in enumerate(chunks)
             ]
             await asyncio.gather(*tasks)
-        logger.info(f"##### 最新{self._mention_name}仓库内容已获取! \n")
+        logger.info(f"##### Latest {self._mention_name} content has been obtained! \n")
 
     async def unzip_latest_repository(self):
         """解压到本地"""
-        logger.info(f"===== 开始解压{self._mention_name}最新仓库内容 ...")
+        logger.info(f"===== Start unzip {self._mention_name} latest DoL ...")
         with zf(DIR_TEMP_ROOT / f"dol{self._mention_name}.zip") as zfp:
             zfp.extractall(DIR_ROOT)
-        logger.info(f"##### 最新{self._mention_name}仓库内容已解压! \n")
+        logger.info(f"##### latest {self._mention_name} DoL contents have been unpacked! \n")
 
     async def patch_format_js(self):
         """汉化 format.js"""
-        logger.info(f"===== 开始替换 format.js ...")
+        logger.info(f"===== Replacing format.js ...")
         shutil.copyfile(
             DIR_DATA_ROOT / "jsmodule" / "format.js",
             DIR_GAME_ROOT_COMMON / "devTools" / "tweego" / "storyFormats" / "sugarcube-2" / "format.js"
         )
-        logger.info(f"##### format.js 已替换！\n")
+        logger.info(f"##### format.js replaced！\n")
 
     """ 创建生肉词典 """
     async def create_dicts(self):
@@ -138,7 +138,7 @@ class ProjectDOL:
 
     async def _fetch_all_text_files(self):
         """获取所有文本文件"""
-        logger.info(f"===== 开始获取{self._mention_name}所有文本文件位置 ...")
+        logger.info(f"===== Start getting {self._mention_name} all text file locations ...")
         self._game_texts_file_lists = []
         if self._type == "common":
             texts_dir = DIR_GAME_TEXTS_COMMON
@@ -165,7 +165,7 @@ class ProjectDOL:
                 else:
                     self._game_texts_file_lists.append(Path(root).absolute() / file)
 
-        logger.info(f"##### {self._mention_name}所有文本文件位置已获取 !\n")
+        logger.info(f"##### {self._mention_name} All text file locations obtained !\n")
 
     async def _create_all_text_files_dir(self):
         """创建目录防报错"""
@@ -186,13 +186,13 @@ class ProjectDOL:
 
     async def _process_texts(self):
         """处理翻译文本为键值对"""
-        logger.info(f"===== 开始处理{self._mention_name}翻译文本为键值对 ...")
+        logger.info(f"===== Start processing {self._mention_name} translation text into key-value pairs ...")
         tasks = [
             self._process_for_gather(idx, file)
             for idx, file in enumerate(self._game_texts_file_lists)
         ]
         await asyncio.gather(*tasks)
-        logger.info(f"##### {self._mention_name}翻译文本已处理为键值对 ! \n")
+        logger.info(f"##### {self._mention_name} The translation text is processed into key-value pairs! \n")
 
     async def _process_for_gather(self, idx: int, file: Path):
         target_file = Path().joinpath(*file.parts[file.parts.index("game")+1:]).with_suffix("")
@@ -217,7 +217,7 @@ class ProjectDOL:
             ]
 
         if not any(able_lines):
-            logger.warning(f"\t- ***** 文件 {file} 无有效翻译行 !")
+            logger.warning(f"\t- ***** File {file} has no valid translation lines!")
             return
         try:
             results_lines_csv = [
@@ -275,7 +275,7 @@ class ProjectDOL:
                     "pos": pos_relative + pos_start if pos_relative is not None else pos_global + pos_start  # 非 twee 文件为 null
                 })
                 if content[pos_global + pos_start] != line.lstrip()[0]:
-                    logger.error(f"pos可能不对！{file} | {passage_name} | {line}".replace("\t", "\\t").replace("\n", "\\n"))
+                    logger.error(f"pos may be incorrect！{file} | {passage_name} | {line}".replace("\t", "\\t").replace("\n", "\\n"))
             if pos_relative is not None and not line.startswith("::"):
                 pos_relative += len(line)
             pos_global += len(line)
@@ -324,14 +324,14 @@ class ProjectDOL:
 
             if not os.listdir(Path(root)):
                 shutil.rmtree(Path(root))
-        logger.info(f"##### {self._mention_name}所有文本已去重 !\n")
+        logger.info(f"##### {self._mention_name} All text has been deduplicated!\n")
 
     """ 替换生肉词典 """
     async def update_dicts(self):
         """更新字典"""
         if not self._version:
             await self.fetch_latest_version()
-        logger.info(f"===== 开始更新{self._mention_name}字典 ...")
+        logger.info(f"===== Starting update{self._mention_name}dict ...")
         file_mapping: dict = {}
         for root, dir_list, file_list in os.walk(DIR_PARATRANZ / self._type / "utf8"):  # 导出的旧字典
             if "失效词条" in root:
@@ -348,7 +348,7 @@ class ProjectDOL:
         ]
         await asyncio.gather(*tasks)
         await self._integrate_json()
-        logger.info(f"##### {self._mention_name}字典更新完毕 !\n")
+        logger.info(f"##### {self._mention_name} dicts updated!\n")
 
     async def _update_for_gather(self, old_file: Path, new_file: Path, json_file: Path):
         """
@@ -392,7 +392,7 @@ class ProjectDOL:
                     try:
                         json_data[idx_]["translation"] = ts
                     except IndexError as e:
-                        logger.error(f"json与csv长度不同: {json_file}")
+                        logger.error(f"json and csv have different lengths: {json_file}")
 
         # 2. 不存在的英文移入失效词条
         unavailables = []
@@ -486,7 +486,7 @@ class ProjectDOL:
             DIR_GAME_TEXTS = DIR_GAME_TEXTS_COMMON
         else:
             DIR_GAME_TEXTS = DIR_GAME_TEXTS_DEV
-        logger.info(f"===== 开始覆写{self._mention_name}汉化 ...")
+        logger.info(f"===== Start overwriting{self._mention_name}translation ...")
 
         type_manual = type_manual or self._type
         # 脑子转不过来，先这样写吧
@@ -516,7 +516,7 @@ class ProjectDOL:
             for idx, (csv_file, twee_file) in enumerate(file_mapping.items())
         ]
         await asyncio.gather(*tasks)
-        logger.info(f"##### {self._mention_name}汉化覆写完毕 !\n")
+        logger.info(f"##### {self._mention_name} Translation completed !\n")
 
     async def _apply_for_gather(self, csv_file: Path, target_file: Path, debug_flag: bool = False):
         """gather 用"""
@@ -536,11 +536,11 @@ class ProjectDOL:
                 zh = re.sub('^(“)', '"', zh)
                 zh = re.sub('(”)$', '"', zh)
                 if self._is_lack_angle(zh, en):
-                    logger.warning(f"\t!!! 可能的尖括号数量错误：{en} | {zh} | https://paratranz.cn/projects/{PARATRANZ_PROJECT_DOL_ID}/strings?text={quote(en)}")
+                    logger.warning(f"\t!!! Possible wrong number of angle brackets {en} | {zh} | https://paratranz.cn/projects/{PARATRANZ_PROJECT_DOL_ID}/strings?text={quote(en)}")
                     if debug_flag:
                         webbrowser.open(f"https://paratranz.cn/projects/{PARATRANZ_PROJECT_DOL_ID}/strings?text={quote(en)}")
                 if self._is_different_event(zh, en):
-                    logger.warning(f"\t!!! 可能的事件名称错翻：{en} | {zh} | https://paratranz.cn/projects/{PARATRANZ_PROJECT_DOL_ID}/strings?text={quote(en)}")
+                    logger.warning(f"\t!!! Possible event name mistranslation: {en} | {zh} | https://paratranz.cn/projects/{PARATRANZ_PROJECT_DOL_ID}/strings?text={quote(en)}")
                     if debug_flag:
                         webbrowser.open(f"https://paratranz.cn/projects/{PARATRANZ_PROJECT_DOL_ID}/strings?text={quote(en)}")
 
@@ -555,7 +555,7 @@ class ProjectDOL:
         if target_file.name.endswith(".js"):
             try:
                 self._acorn.parse("".join(raw_targets))
-                LOGGER_COLOR.info(f"<g>JS 语法检测通过</g> {target_file}")
+                LOGGER_COLOR.info(f"<g>JS syntax check passed</g> {target_file}")
             except JSSyntaxError as err:
                 try:
                     LOGGER_COLOR.error(f"{target_file} | {err.err_code(raw_targets)}")
@@ -698,7 +698,7 @@ class ProjectDOL:
         async with httpx.AsyncClient(verify=False) as client:
             response = await client.get(REPOSITORY_COMMITS_URL_COMMON, params={"ref_name": ref_name})
             if response.status_code != 200:
-                logger.error("获取源仓库 commit 出错！")
+                logger.error("Error getting source repository commit!")
                 return None
             repo_json = response.json()
         if not repo_json:
@@ -708,10 +708,10 @@ class ProjectDOL:
         self._is_latest = bool(self._commit and latest_commit["id"] == self._commit["id"])
         if self._is_latest:
             return None
-        logger.info(f"===== 开始写入{self._mention_name}最新 commit ...")
+        logger.info(f"===== Start writing{self._mention_name}latest commit ...")
         with open(FILE_COMMITS, "w") as fp:
             json.dump(latest_commit, fp, ensure_ascii=False, indent=2)
-            logger.info(f"#### {self._mention_name}最新 commit 已写入！")
+            logger.info(f"#### {self._mention_name}latest commit has been written!")
 
     def get_type(self, common, dev):
         if self._type == "common":
@@ -769,12 +769,12 @@ class ProjectDOL:
         """恢复到最初时的样子"""
         if not force:
             await self.get_lastest_commit()
-        logger.warning("===== 开始删库跑路 ...")
+        logger.warning("===== Deleting data ...")
         await self._drop_temp()
         await self._drop_gitgud()
         await self._drop_dict()
         await self._drop_paratranz()
-        logger.warning("##### 删库跑路完毕 !\n")
+        logger.warning("##### Data deleted!\n")
            
     async def _drop_temp(self):
         """删掉临时文件"""
@@ -795,12 +795,12 @@ class ProjectDOL:
                     shutil.move(DIR_TEMP_ROOT / "dol世扩.zip", DIR_ROOT)
 
             shutil.rmtree(DIR_TEMP_ROOT, ignore_errors=True)
-        logger.warning("\t- 缓存目录已删除")
+        logger.warning("\t- Cache directory deleted")
 
     async def _drop_gitgud(self):
         """删掉游戏库"""
         shutil.rmtree(self.game_dir, ignore_errors=True)
-        logger.warning(f"\t- {self._mention_name}游戏目录已删除")
+        logger.warning(f"\t- {self._mention_name}Game directory deleted")
 
     async def _drop_dict(self):
         """删掉生成的字典"""
@@ -808,17 +808,17 @@ class ProjectDOL:
             await self.fetch_latest_version()
         shutil.rmtree(DIR_RAW_DICTS / self._type / self._version, ignore_errors=True)
         shutil.rmtree(DIR_RAW_DICTS / "common" / self._version, ignore_errors=True)
-        logger.warning(f"\t- {self._mention_name}字典目录已删除")
+        logger.warning(f"\t- {self._mention_name}dict directory deleted")
 
     async def _drop_paratranz(self):
         """删掉下载的汉化包"""
         shutil.rmtree(DIR_PARATRANZ / self._type, ignore_errors=True)
-        logger.warning(f"\t- {self._mention_name}汉化目录已删除")
+        logger.warning(f"\t- {self._mention_name}Translation directory deleted")
 
     """ 编译游戏 """
     def compile(self, chs_version: str = ""):
         """编译游戏"""
-        logger.info("===== 开始编译游戏 ...")
+        logger.info("===== Start building game ...")
         # self._before_compile(chs_version)
         if platform.system() == "Windows":
             self._compile_for_windows()
@@ -826,7 +826,7 @@ class ProjectDOL:
             self._compile_for_linux()
         else:
             raise Exception("什么电脑系统啊？")
-        logger.info("##### 游戏编译完毕 !")
+        logger.info("##### Game build complete!")
 
     def _before_compile(self, chs_version: str = ""):
         """修改一些编译设置"""
@@ -857,7 +857,7 @@ class ProjectDOL:
         """win"""
         subprocess.Popen(self.game_dir / "compile.bat")
         time.sleep(5)
-        logger.info(f"\t- Windows 游戏编译完成，位于 {self.game_dir / 'Degrees of Lewdity VERSION.html'}")
+        logger.info(f"\t- Windows: Game builded，and located at {self.game_dir / 'Degrees of Lewdity VERSION.html'}")
 
     def _compile_for_linux(self):
         """linux"""
@@ -869,7 +869,7 @@ class ProjectDOL:
             tweego_compile_sh.chmod(tweego_compile_sh.stat().st_mode | stat.S_IEXEC)
         subprocess.Popen("bash ./compile.sh", env=os.environ, shell=True, cwd=self.game_dir)
         time.sleep(5)
-        logger.info(f"\t- Linux 游戏编译完成，位于 {self.game_dir / 'Degrees of Lewdity VERSION.html'}")
+        logger.info(f"\t- Linux: Game builded，and located at {self.game_dir / 'Degrees of Lewdity VERSION.html'}")
 
     def _compile_for_mobile(self):
         """android"""
@@ -897,10 +897,10 @@ class ProjectDOL:
         git_repo = os.getenv("GIT_REPO")
         dol_chinese_path = DIR_ROOT / git_repo
         if not dol_chinese_path.exists():
-            logger.warning(f"不存在{git_repo}文件夹")
+            logger.warning(f"folder{git_repo}not exist")
             return
 
-        logger.info("===== 开始复制到 git ...")
+        logger.info("===== Start copying to git ...")
         game_dir_path = self.game_dir
         game_dir = os.listdir(game_dir_path)
 
@@ -909,7 +909,7 @@ class ProjectDOL:
             if file.startswith("Degrees of Lewdity") and file.endswith("html"):
                 dol_html = "beta" if GITHUB_ACTION_ISBETA else "index"
                 game_html = game_dir_path / file
-                logger.info("复制到GIT文件夹")
+                logger.info("Copy to GIT folder")
                 shutil.copyfile(
                     game_html,
                     dol_chinese_path / f"{dol_html}.html",
@@ -917,7 +917,7 @@ class ProjectDOL:
                 beeesssmod_dir_path =dol_chinese_path / "beeesssmod"
                 beeesssmod_dir = Path(beeesssmod_dir_path)
                 if beeesssmod_dir.is_dir():
-                    logger.info("同步到美化包文件夹")
+                    logger.info("Sync to beeesssmod package folder")
                     shutil.copyfile(
                         game_html,
                         beeesssmod_dir_path / f"{dol_html}.html",
@@ -939,10 +939,10 @@ class ProjectDOL:
             ignore=lambda src,files: [f for f in files if f.endswith(".js") or f.endswith(".bat")],
             dirs_exist_ok=True,
         )
-        logger.info("##### 复制到 git 已完毕! ")
+        logger.info("##### Copying to git completed! ")
         await self.drop_all_dirs(True)
 
-    """ 在浏览器中启动 """
+    """ Open browser """
     def run(self):
         webbrowser.open((self.game_dir / "Degrees of Lewdity VERSION.html").__str__())
 

@@ -135,7 +135,7 @@ async def main():
 
     pt_common = Paratranz(type_=SOURCE_TYPE)
     if not PARATRANZ_TOKEN:
-        logger.error("未填写 PARATRANZ_TOKEN, 汉化包下载可能失败，请前往 https://paratranz.cn/users/my 的设置栏中查看自己的 token, 并在 .env 中填写\n")
+        logger.error("If PARATRANZ_TOKEN is empty, download may fail, go to https://paratranz.cn/users/my settings for your token, and fill in .env \n")
         return
 
     await process_common(dol_common, pt_common, chs_version=CHINESE_VERSION)
@@ -146,7 +146,7 @@ async def main():
 
 if __name__ == "__main__":
     last = asyncio.run(main())
-    logger.info(f"===== 总耗时 {last or -1:.2f}s =====")
+    logger.info(f"===== Total time {last or -1:.2f}s =====")
     try:
         from win10toast import ToastNotifier
     except ImportError:

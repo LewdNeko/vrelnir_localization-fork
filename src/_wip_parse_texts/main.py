@@ -72,7 +72,7 @@ class ParseTwine:
     # 文件路径
     def get_all_twine_filepaths(self) -> None:
         """获取所有文件绝对路径，方便下一步提取"""
-        logger.info("开始获取所有 twine 文件绝对路径……")
+        logger.info("Start getting the absolute paths of twine files...")
         self._twine_filepaths = [
             Path(root) / file
             for root, _, files in os.walk(DIR_GAME_TEXTS)
@@ -80,12 +80,12 @@ class ParseTwine:
             if file.endswith(".twee")
         ]
 
-        logger.info("所有 twine 文件绝对路径已获取！")
+        logger.info("absolute paths of all twine files have been obtained!")
 
     # 段落信息
     def get_all_twine_passages(self):
         """获取所有的段落信息，方便下一步提取和元素位置记录"""
-        logger.info("开始获取所有 twine 段落信息……")
+        logger.info("Start getting twine passages...")
         for filepath in self._twine_filepaths:
             with open(filepath, "r", encoding="utf-8") as fp:
                 content = fp.read()
@@ -125,12 +125,12 @@ class ParseTwine:
                 else:
                     raise
 
-        logger.info("所有 twine 段落信息已获取！")
+        logger.info("All twine passages ready!")
 
     # 基础元素
     def get_all_basic_elements(self):
         """获取所有 comment, head, macro 和 tag 的信息，剩下的就是 plain text"""
-        logger.info("开始获取所有 twine 基础元素……")
+        logger.info("Start getting all the twine basics...")
 
         def _add_element(fp: str, pg: str, match: re.Match, type_: str):
             """重复的部分提出来封装"""
@@ -169,7 +169,7 @@ class ParseTwine:
 
         self.sort_elements_data()
         self.filter_comment_inside()
-        logger.info("所有 twine 基础元素已获取！")
+        logger.info("All twine basic elements ready!")
 
     # 剔除注释中元素
     def filter_comment_inside(self):
@@ -198,7 +198,7 @@ class ParseTwine:
     def get_all_plaintext_elements(self):
         # sourcery skip: hoist-statement-from-if
         """夹在其它元素之间的就是 plain text"""
-        logger.info("开始获取所有 twine 纯文本元素……")
+        logger.info("Start getting all twine plain text elements...")
 
         for filepath, elements_data in self._twine_elements_data.items():
             for passage, elements in elements_data.items():
@@ -254,7 +254,7 @@ class ParseTwine:
 
                 self._twine_elements_data[filepath][passage] = elements
         self.sort_elements_data()
-        logger.info("所有 twine 纯文本元素已获取！")
+        logger.info("All twine plain text elements ready!")
 
     # 排序
     def sort_elements_data(self):
@@ -266,7 +266,7 @@ class ParseTwine:
     # 先按照开闭组合一遍
     def combine_twine_element_pairs(self):
         """将元素按照开闭/段落进行初次组合"""
-        logger.info("开始初次组合所有元素……")
+        logger.info("Starting to combine twine element pairs first...")
 
         def _add_element(fp: str, pg: str, elem: str, start: int, end: int):
             """这是添加元素的，重复的部分提出来封装"""
@@ -438,12 +438,12 @@ class ParseTwine:
                     else:
                         _add_element(filepath, passage, content[head_start:head_end], head_start, head_end)
 
-        logger.info("所有元素已初次组合！")
+        logger.info("Twine elements combined!")
 
     # 再按照字数组合一遍
     def combine_twine_element_full(self):
         """将元素按照字数进行二次组合"""
-        logger.info("开始二次组合所有元素……")
+        logger.info("Start combining twine elements second time...")
         for filepath, elements_data in self._twine_combined_elements_data.items():
             for passage, elements in elements_data.items():
                 if len(elements) == 1:  # 这是一整个段落都合并了的情况，直接添加然后跳出就好
@@ -526,12 +526,12 @@ class ParseTwine:
                 # 用新组合后的替换掉之前的
                 self._twine_combined_elements_data[filepath][passage] = temp_elements
 
-        logger.info("所有元素已二次组合！")
+        logger.info("All elements have been combined a second time!")
 
     # 一次性函数，将旧汉化方式的译文、词条状态提取出详细信息
     def build_paratranz_detailed_raw_data(self):
         """一次性函数，将旧汉化方式的译文、词条状态提取出详细信息"""
-        logger.info("开始生成旧汉化方式译文详细信息……")
+        logger.info("Generating old translation details")
 
         def _add_element(fp_: str, orig: str, trns: str, stg: int, info: list):
             data = {
@@ -561,7 +561,7 @@ class ParseTwine:
 
                 # 文件在新版里没有，可能删了或者改名了
                 if filepath not in self._twine_passage_data:
-                    logger.warning(f"{filepath} 不存在！可能删改了！")
+                    logger.warning(f"{filepath} Does not exist! Maybe it has been deleted or modified!")
                     continue
 
                 with open(Path(root) / file, "r", encoding="utf-8") as fp:
@@ -596,10 +596,10 @@ class ParseTwine:
                         flag = True
 
                     if not flag:
-                        logger.error(f"！找不到词条 - {original} | {filepath}")
+                        logger.error(f"！No entry found - {original} | {filepath}")
 
                     _add_element(filepath, original, translation, stage, pos_info)
-        logger.info("旧汉化方式译文详细信息已生成！")
+        logger.info("The detailed information of the old translation has been generated!")
 
     # 一次性函数，用来将旧汉化方式的译文、词条状态迁移到新汉化方式用的
     def build_paratranz_combined_raw_data(self):
@@ -628,7 +628,7 @@ class ParseTwine:
     # 修改格式为可以在 paratranz 导入的文件
     def build_paratranz_format(self):
         """将结果转为可供 paratranz 识别的格式"""
-        logger.info("开始修改为 paratranz 格式……")
+        logger.info("Building ParaTranz format...")
 
         def _add_element(fp: str, pg: str, k: str, orig: str, trns: str, ctx: str, stg: int):
             """
@@ -660,12 +660,12 @@ class ParseTwine:
                 for idx, element in enumerate(elements):
                     key = f"{filepath.replace('.twee', '')}|{passage}|{idx}"
                     _add_element(filepath, passage, key, element["element"], "", "", 0)
-        logger.info("已修改为 paratranz 格式！")
+        logger.info("ParaTranz format ready!")
 
     # 导出为文件
     def export_data(self):
         """导出数据"""
-        logger.info("开始导出所有文件……")
+        logger.info("Exporting files...")
         with open(DIR_TARGET / "twine_passage_names.json", "w", encoding="utf-8") as fp:
             json.dump(self._twine_passage_names, fp, ensure_ascii=False, indent=2)
 
@@ -686,7 +686,7 @@ class ParseTwine:
 
         with open(DIR_TARGET / "paratranz_elements_data.json", "w", encoding="utf-8") as fp:
             json.dump(self._paratranz_elements_data, fp, ensure_ascii=False, indent=2)
-        logger.info("所有文件已导出！")
+        logger.info("All files exported!")
 
 
 def main():

@@ -6,7 +6,7 @@ from .log import logger
 
 
 async def chunk_split(filesize: int, chunk: int = 2) -> list[list[int]]:
-    """给大文件切片"""
+    """Split large files"""
     step = filesize // chunk
     arr = range(0, filesize, step)
     result = [[arr[i], arr[i + 1] - 1] for i in range(len(arr) - 1)]
@@ -25,7 +25,7 @@ async def chunk_download(
     save_path: Path,
     headers_: dict = None,
 ):
-    """切片下载"""
+    """Download chunks"""
     if not save_path.exists():
         with open(save_path, "wb") as _:
             ...
@@ -38,7 +38,7 @@ async def chunk_download(
     async with aopen(save_path, "rb+") as fp:
         await fp.seek(start)
         await fp.write(response.content)
-        logger.info(f"\t- 切片 {idx + 1} / {full} 已下载")
+        logger.info(f"\t- chunk {idx + 1} / {full} downloaded")
 
 
 __all__ = ["chunk_split", "chunk_download"]

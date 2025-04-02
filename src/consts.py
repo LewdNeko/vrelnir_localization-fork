@@ -7,14 +7,14 @@ import platform
 import sys
 
 load_dotenv()
-"""当前系统"""
+"""Current system"""
 PLATFORM_SYSTEM = platform.system()
 PLATFORM_ARCHITECTURE = platform.architecture()[0]
 SYSTEM_ARGV = sys.argv
 GITHUB_ACTION_DEV = len(SYSTEM_ARGV) > 1 and SYSTEM_ARGV[1] == "-D"
 GITHUB_ACTION_ISBETA = len(SYSTEM_ARGV) > 2 and SYSTEM_ARGV[2] == "beta"
 
-"""汉化仓库"""
+"""Translation"""
 PARATRANZ_TOKEN = os.getenv("PARATRANZ_TOKEN") or ""  # 必填，在个人设置里
 PARATRANZ_BASE_URL = "https://paratranz.cn/api"
 PARATRANZ_HEADERS = {"Authorization": PARATRANZ_TOKEN}
@@ -26,14 +26,14 @@ SOURCE_TYPE = os.getenv("SOURCE_TYPE") or "common"  # 必填，common 或 dev
 REPOSITORY_MODLOADER_ARTIFACTS = "https://api.github.com/repos/Lyoko-Jeremie/DoLModLoaderBuild/actions/artifacts"
 GITHUB_ACCESS_TOKEN = os.getenv("GITHUB_ACCESS_TOKEN") or ""
 
-"""源代码仓库"""
+"""Source code repository"""
 REPOSITORY_URL_COMMON = "https://gitgud.io/Vrelnir/degrees-of-lewdity"
 REPOSITORY_ZIP_URL_COMMON = "https://gitgud.io/Vrelnir/degrees-of-lewdity/-/archive/master/degrees-of-lewdity-master.zip"
 REPOSITORY_COMMITS_URL_COMMON = "https://gitgud.io/api/v4/projects/8430/repository/commits"
 REPOSITORY_URL_DEV = "https://gitgud.io/Vrelnir/degrees-of-lewdity"
 REPOSITORY_ZIP_URL_DEV = "https://gitgud.io/Vrelnir/degrees-of-lewdity/-/archive/dev/degrees-of-lewdity-dev.zip"
 
-"""本地目录"""
+"""Local directories"""
 DIR_ROOT = Path(__file__).parent.parent
 DIR_DATA_ROOT = DIR_ROOT / "data"
 DIR_JSON_ROOT = DIR_DATA_ROOT / "json"
@@ -56,7 +56,7 @@ DIR_RAW_DICTS = DIR_DATA_ROOT / "raw_dicts"
 
 DIR_PARATRANZ = DIR_DATA_ROOT / "paratranz"
 
-"""文件"""
+"""Files"""
 FILE_REPOSITORY_ZIP = DIR_TEMP_ROOT / "dol.zip"
 FILE_PARATRANZ_ZIP = DIR_TEMP_ROOT / "paratranz_export.zip"
 FILE_COMMITS = DIR_JSON_ROOT / "commits.json"
@@ -68,7 +68,7 @@ SUFFIX_JS = ".js"
 
 
 class DirNamesTwee(Enum):
-    """特殊的目录名"""
+    """Special directories"""
 
     FRAMEWORK = "00-framework-tools"
     CONFIG = "01-config"
@@ -89,7 +89,7 @@ class DirNamesTwee(Enum):
 
 
 class FileNamesTwee(Enum):
-    """特殊的文件名"""
+    """Special files"""
 
     """ 00-framework-tools """
     WAITING_ROOM_FULL = "waiting-room.twee"  # FULL 代表这就是文件名
@@ -190,7 +190,7 @@ class DirNamesJS(Enum):
 
 
 class FileNamesJS(Enum):
-    """要抓的 JS 文件"""
+    """JS files to grab"""
     """01-setup"""
     WEATHER_DESCRIPTION_FULL = "weather-descriptions.js"
 
